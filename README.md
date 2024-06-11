@@ -26,17 +26,17 @@ You will also need the `oc` and `argocd` CLIs.
 1. Using `oc`, Login to all of the clusters as a user with the cluster-admin role. Rename each oc context to make it easier to switch between clusters later.
 ```
 # Hub
-oc login --token=sha256~A2w0Et-SaQqg64pTZei34FJHn6CKHc_kpR67kSrQBsI --server=https://api.cluster-pbntg.dynamic.redhatworkshops.io:6443
+oc login --token=sha256~yourtokenfromhubui --server=https://api.cluster-pbntg.dynamic.redhatworkshops.io
 oc config current-context
-oc config rename-context default/api-cluster-pbntg-dynamic-redhatworkshops-io:6443/admin hub
+oc config rename-context default/api-cluster-pbntg-dynamic-redhatworkshops-io/admin hub
 
 # Spoke 1
-oc login --token=sha256~M_Ub8LhyzctSTZcsu-A8wcq29ttxQWQUoCYXdlZp57k --server=https://api.cluster-9vkr6.dynamic.redhatworkshops.io:6443
+oc login --token=sha256~yourtokenfromspoke1ui --server=https://api.spoke1.example.com
 oc config current-context
-oc config rename-context default/api-cluster-9vkr6-dynamic-redhatworkshops-io:6443/admin spoke1
+oc config rename-context default/api-spoke1.example.com/admin spoke1
 
 # Spoke 2
-oc login --token=sha256~tEizXc-sIy8P3bSVDhRAAl93sWg4ZgsNHBiC-Ow4nOI --server=https://api.cluster-zscjv.dynamic.redhatworkshops.io:6443
+oc login --token=sha256~yourtokenfromspoke2ui --server=https://api.spoke2.example.com
 oc config current-context
 
 # Switch to Hub
@@ -101,9 +101,9 @@ spec:
   - list:
       elements:
       - cluster: spoke1
-        url: https://api.cluster-9vkr6.dynamic.redhatworkshops.io:6443
+        url: https://api.spoke1.example.com
       - cluster: spoke2
-        url: https://api.cluster-zscjv.dynamic.redhatworkshops.io:6443
+        url: https://api.spoke2.example.com
   goTemplate: true
   goTemplateOptions:
   - missingkey=error
@@ -112,7 +112,7 @@ spec:
       name: example-{{ .cluster }}
     spec:
       destination:
-        namespace: example
+        namespace: example-{{ .cluster }}
         server: '{{ .url }}'
       project: default
       source:
@@ -140,6 +140,6 @@ argocd app list
 
 8. Test that the workloads themselves are working. You can also visit the links in a browser.
 ```
-curl hello-world-example.apps.cluster-9vkr6.dynamic.redhatworkshops.io
-curl hello-world-example.apps.cluster-9vkr6.dynamic.redhatworkshops.io
+curl hello-world-example-spoke1.apps.spoke1.example.com
+curl hello-world-example-spoke2.apps.spoke2.example.com
 ```
