@@ -63,7 +63,8 @@ spec:
   sourceNamespace: openshift-marketplace
 EOF
 
-# Wait for ArgoCD to start. You can also just watch the console.
+3. Wait for ArgoCD to start. You can also just watch the console.
+```
 while true; do sleep 5; oc get po -n openshift-gitops -l app.kubernetes.io/name=cluster -o json | jq '.items[0].status.conditions[] | select(.type=="Ready").status=="True"' > /dev/null && break; echo -n .; done
 ```
 
