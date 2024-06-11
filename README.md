@@ -116,12 +116,9 @@ spec:
         server: '{{ .url }}'
       project: default
       source:
-        #repoURL: https://github.com/validatedpatterns/multicloud-gitops.git
-        #path: "charts/all/hello-world/"
-        #targetRevision: HEAD
-        repoURL: https://github.com/argoproj/argocd-example-apps.git
+        repoURL: https://github.com/validatedpatterns/multicloud-gitops.git
+        path: "charts/all/hello-world/"
         targetRevision: HEAD
-        path: guestbook
       syncPolicy:
         automated: {}
         syncOptions:
@@ -137,3 +134,12 @@ argocd --grpc-web appset list
 ArgoCD shows a list of all ApplicationSets. The output should include a message indicating that ArgoCD has "Successfully generated parameters for all Applications".
 
 7. Verify the status of the Applications.
+```
+argocd app list
+```
+
+8. Test that the workloads themselves are working. You can also visit the links in a browser.
+```
+curl hello-world-example.apps.cluster-9vkr6.dynamic.redhatworkshops.io
+curl hello-world-example.apps.cluster-9vkr6.dynamic.redhatworkshops.io
+```
