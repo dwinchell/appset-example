@@ -27,17 +27,18 @@ You will also need the `oc` and `argocd` CLIs.
 ```
 # Hub
 oc login --token=sha256~yourtokenfromhubui --server=https://api.cluster-pbntg.dynamic.redhatworkshops.io
-oc config current-context
+oc config current-context # Copy context name
 oc config rename-context default/api-cluster-pbntg-dynamic-redhatworkshops-io/admin hub
 
 # Spoke 1
 oc login --token=sha256~yourtokenfromspoke1ui --server=https://api.spoke1.example.com
-oc config current-context
+oc config current-context # Copy context name
 oc config rename-context default/api-spoke1.example.com/admin spoke1
 
 # Spoke 2
 oc login --token=sha256~yourtokenfromspoke2ui --server=https://api.spoke2.example.com
-oc config current-context
+oc config current-context # Copy context name
+oc config rename-context default/api-spoke2.example.com/admin spoke1
 
 # Switch to Hub
 oc config use-context hub
