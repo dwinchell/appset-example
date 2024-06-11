@@ -82,7 +82,7 @@ argocd account update-password --current-password=${INITIAL_ARGOCD_PASSWORD} --n
 oc delete secret -n openshift-gitops openshift-gitops-cluster
 ```
 
-5. Configure Hub to connect to and manage Spoke1 and Spoke2.
+5. Configure the Hub cluster to connect to and manage the Spoke1 and Spoke2 clusters.
 
 *WARNING: This will create a service account `argocd-manager` on the cluster referenced by context `spoke1` with full cluster level privileges.*
 
