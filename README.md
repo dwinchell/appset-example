@@ -101,9 +101,9 @@ spec:
   - list:
       elements:
       - cluster: spoke1
-        url: api-cluster-9vkr6-dynamic-redhatworkshops-io:6443
+        url: https://api.cluster-9vkr6.dynamic.redhatworkshops.io:6443
       - cluster: spoke2
-        url: api-cluster-zscjv-dynamic-redhatworkshops-io:6443
+        url: https://api.cluster-zscjv.dynamic.redhatworkshops.io:6443
   goTemplate: true
   goTemplateOptions:
   - missingkey=error
@@ -116,11 +116,24 @@ spec:
         server: '{{ .url }}'
       project: default
       source:
-        repoURL: https://github.com/validatedpatterns/multicloud-gitops.git
-        path: charts/all/example
+        #repoURL: https://github.com/validatedpatterns/multicloud-gitops.git
+        #path: "charts/all/hello-world/"
+        #targetRevision: HEAD
+        repoURL: https://github.com/argoproj/argocd-example-apps.git
         targetRevision: HEAD
+        path: guestbook
       syncPolicy:
+        automated: {}
         syncOptions:
         - CreateNamespace=true
-> EOF
+EOF
 ```
+
+6. Verify the status of the ApplicationSet.
+```
+argocd --grpc-web appset list
+```
+
+ArgoCD shows a list of all ApplicationSets. The output should include a message indicating that ArgoCD has "Successfully generated parameters for all Applications".
+
+7. Verify the status of the Applications.
