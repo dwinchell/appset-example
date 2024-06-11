@@ -44,6 +44,7 @@ oc config use-context hub
 
 # Verify
 oc config view
+```
 
 2. Install the OpenShift GitOps operator on the Hub. This will install an instance of ArgoCD. *Make sure you are using the hub context.*
 ```
