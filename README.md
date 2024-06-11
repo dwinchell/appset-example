@@ -87,3 +87,40 @@ oc delete secret -n openshift-gitops openshift-gitops-cluster
 argocd cluster add -y spoke1
 argocd cluster add -y spoke2
 ```
+
+5. Create an ApplicationSet that will deploy an example application to Spoke 1 and Spoke 2.
+```
+oc apply -f - <<EOF
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: example
+  namespace: openshift-gitops
+spec:
+  generators:
+  - list:
+      elements:
+      - cluster: spoke1
+        url: api-cluster-9vkr6-dynamic-redhatworkshops-io:6443
+      - cluster: spoke2
+        url: api-cluster-zscjv-dynamic-redhatworkshops-io:6443
+  goTemplate: true
+  goTemplateOptions:
+  - missingkey=error
+  template:
+    metadata:
+      name: example-{{ .cluster }}
+    spec:
+      destination:
+        namespace: example
+        server: '{{ .url }}'
+      project: default
+      source:
+        repoURL: https://github.com/validatedpatterns/multicloud-gitops.git
+        path: charts/all/example
+        targetRevision: HEAD
+      syncPolicy:
+        syncOptions:
+        - CreateNamespace=true
+> EOF
+```
