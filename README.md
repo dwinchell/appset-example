@@ -50,7 +50,7 @@ oc config view
 oc config use-context hub
 
 oc apply -f - << EOF
-> apiVersion: operators.coreos.com/v1alpha1
+apiVersion: operators.coreos.com/v1alpha1
 kind: Subscription
 metadata:
   name: openshift-gitops-operator
@@ -62,6 +62,7 @@ spec:
   source: redhat-operators
   sourceNamespace: openshift-marketplace
 EOF
+```
 
 3. Wait for ArgoCD to start. You can also just watch the console.
 ```
