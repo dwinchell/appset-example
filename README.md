@@ -66,12 +66,14 @@ spec:
 EOF
 ```
 
-3. Wait for ArgoCD to start. You can also just watch the console.
+3. Wait for the OpenShift GitOps operator to install, and for the ArgoCD server to start.
+
+This should take a few minutes. You can optionally use the command below to wait until the relevant Pod is running.
 ```
 while true; do sleep 5; oc get po -n openshift-gitops -l app.kubernetes.io/name=cluster -o json | jq '.items[0].status.conditions[] | select(.type=="Ready").status=="True"' > /dev/null && break; echo -n .; done
 ```
 
-3. Get the inital ArgoCD admin password, login, and reset the password.
+4. Get the inital ArgoCD admin password, login, and reset the password.
 ```
 export INITIAL_ARGOCD_PASSWORD=$(oc get secret -n openshift-gitops openshift-gitops-cluster -o json | jq '.data["admin.password"]' | sed 's/"//g' | base64 -d)
 export NEW_ARGOCD_PASSWORD=$(tr -dc 'A-Za-z0-9!?%=' < /dev/urandom | head -c 30) # Generates a strong random password
@@ -80,7 +82,7 @@ argocd account update-password --current-password=${INITIAL_ARGOCD_PASSWORD} --n
 oc delete secret -n openshift-gitops openshift-gitops-cluster
 ```
 
-4. Configure Hub to connect to and manage Spoke1 and Spoke2.
+5. Configure Hub to connect to and manage Spoke1 and Spoke2.
 
 *WARNING: This will create a service account `argocd-manager` on the cluster referenced by context `spoke1` with full cluster level privileges.*
 
@@ -89,7 +91,7 @@ argocd cluster add -y spoke1
 argocd cluster add -y spoke2
 ```
 
-5. Create an ApplicationSet that will deploy an example application to Spoke 1 and Spoke 2.
+6. Create an ApplicationSet that will deploy an example application to Spoke 1 and Spoke 2.
 ```
 oc apply -f - <<EOF
 apiVersion: argoproj.io/v1alpha1
@@ -127,19 +129,19 @@ spec:
 EOF
 ```
 
-6. Verify the status of the ApplicationSet.
+7. Verify the status of the ApplicationSet.
 ```
 argocd --grpc-web appset list
 ```
 
 ArgoCD shows a list of all ApplicationSets. The output should include a message indicating that ArgoCD has "Successfully generated parameters for all Applications".
 
-7. Verify the status of the Applications.
+8. Verify the status of the Applications.
 ```
 argocd app list
 ```
 
-8. Test that the workloads themselves are working. You can also visit the links in a browser.
+9. Test that the workloads themselves are working. You can also visit the links in a browser.
 ```
 curl hello-world-example-spoke1.apps.spoke1.example.com
 curl hello-world-example-spoke2.apps.spoke2.example.com
