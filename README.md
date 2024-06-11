@@ -48,7 +48,20 @@ oc config view
 2. Install the OpenShift GitOps operator on the Hub. This will install an instance of ArgoCD. *Make sure you are using the hub context.*
 ```
 oc config use-context hub
-oc apply -f openshift-gitops-subscription.yaml
+
+oc apply -f - << EOF
+> apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: openshift-gitops-operator
+  namespace: openshift-operators
+spec:
+  channel: latest
+  installPlanApproval: Automatic
+  name: openshift-gitops-operator
+  source: redhat-operators
+  sourceNamespace: openshift-marketplace
+EOF
 
 # Wait for ArgoCD to start. You can also just watch the console.
 while true; do sleep 5; oc get po -n openshift-gitops -l app.kubernetes.io/name=cluster -o json | jq '.items[0].status.conditions[] | select(.type=="Ready").status=="True"' > /dev/null && break; echo -n .; done
