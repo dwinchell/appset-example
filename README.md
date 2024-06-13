@@ -26,29 +26,46 @@ You will also need several CLI commands:
 * `jq` - Not strictly required to perform the task, but these instructions use it to simplify certain tasks.
 
 # Setup
-1. Using `oc`, Login to all of the clusters as a user with the cluster-admin role. Rename each oc context to make it easier to switch between clusters later.
+1. Login to the Hub cluster.
+
+The example below assumes you are using a token for authentication, as if you were copy-pasting the login command from the web console. You can also login interactively with a username and password.
+
 ```
-# Login
 oc login --token=sha256~yourtokenfromhubui --server=https://api.hub.example.com
-oc login --token=sha256~yourtokenfromspoke1ui --server=https://api.spoke1.example.com
-oc login --token=sha256~yourtokenfromspoke2ui --server=https://api.spoke2.example.com
+```
 
-# View the names of the contexts
-oc config view
+2. Get the automatically generated name of the `oc` context that represents the connection to the Hub cluster.
+```
+oc current-context
+```
 
-# Rename each context for easier management later
+3. Rename the current context using the `oc rename-context` command and copy-pasting the long, automatically generated name. Set the new name to `hub`. This will make the rest of the commands easier.
+**Important:** do not copy paste this command as-is. Fill in the generated context name from the output of the `oc current-context` command.
+```
 oc config rename-context default/api.hub.example.com/admin hub
+```
+
+4. Repeat steps 1-3 for the spoke clusters. For each cluster: login, get the context name, and rename it. Use `spoke1` and `spoke2` for the names.
+```
+# Spoke1
+oc login --token=sha256~yourtokenfromspoke1ui --server=https://api.spoke1.example.com
+oc current-context
 oc config rename-context default/api-spoke1.example.com/admin spoke1
+
+# Spoke2
+oc login --token=sha256~yourtokenfromspoke2ui --server=https://api.spoke2.example.com
+oc current-context
 oc config rename-context default/api-spoke2.example.com/admin spoke2
+```
 
-# Switch to Hub
+5. Switch to the `hub` context for the next few commands. This will cause the commands you enter to execute in the hub cluster.
+```
 oc config use-context hub
 ```
 
-2. Install the OpenShift GitOps operator on the Hub. This will install an instance of ArgoCD. *Make sure you are using the hub context.*
+6. Install the OpenShift GitOps operator on the Hub. This will install an instance of ArgoCD. *Make sure you are using the hub context.*
 ```
 oc config use-context hub
-
 oc apply -f - << EOF
 apiVersion: operators.coreos.com/v1alpha1
 kind: Subscription
