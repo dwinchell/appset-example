@@ -1,6 +1,7 @@
 # ArgoCD AppSet Example
 An example of how to use ArgoCD ApplicationSets to manage workloads across multiple clusters.
 
+
 # Architecture
 
 This example assumes a hub and spoke architecture. 
@@ -8,6 +9,7 @@ This example assumes a hub and spoke architecture.
 ArgoCD runs only on the hub cluster. It is used to manage workloads on the spoke clusters. ArgoCD ApplicationSets are used to create Applications that define which workloads ArgoCD should deploy to each cluster.
 
 The instructions assume you are running on OpenShift, but the architecture is relevant to any Kubernetes environment and most of the commands should work as-is in other Kubernetes environments. The OpenShift GitOps operator is used to install ArgoCD, but you could install upstream ArgoCD using another method without affecting the rest of the instructions.
+
 
 # Prerequisites
 
@@ -25,7 +27,9 @@ You will also need several CLI commands:
 * `argocd` - the ArgoCD CLI
 * `jq` - Not strictly required to perform the task, but these instructions use it to simplify certain steps.
 
+
 # Setup
+
 1. Login to the OpenShift cluster that will be used as the Hub.
 
 The example below assumes you are using a token for authentication, as if you were copy-pasting the login command from the web console. You can also login interactively with a username and password.
@@ -34,12 +38,22 @@ The example below assumes you are using a token for authentication, as if you we
 oc login --token=sha256~yourtokenfromhub --server=https://api.hub.example.com
 ```
 
+
 2. Get the automatically generated name of the `oc` context that represents the connection to the Hub cluster.
+
+Use the current-context command to display the context name.
+
 ```
 oc current-context
 ```
 
-3. Rename the current context using the `oc rename-context` command and copy-pasting the long, automatically generated name. Set the new name to `hub`. This will make the rest of the commands easier.
+Copy the context name for use in the next step.
+
+!(Example Command Output. Copy paste the name of the context.)[/assets/oc-current-context-screenshot.png]
+
+3. Rename the current context using the `oc rename-context` command. 
+
+Copy the long, automatically generated context name from the previous output and paste it into this command. Set the new name to `hub`. This will make the rest of the commands easier.
 
 **Important:** do not copy paste this command as-is. Fill in the generated context name from the output of the `oc current-context` command.
 
@@ -48,6 +62,7 @@ oc config rename-context default/api.hub.example.com/admin hub
 ```
 
 4. Repeat steps 1-3 for the spoke clusters. For each cluster: login, get the context name, and rename it. Use `spoke1` and `spoke2` for the names.
+
 ```
 # Spoke1
 oc login --token=sha256~yourtokenfromspoke1 --server=https://api.spoke1.example.com
@@ -61,11 +76,13 @@ oc config rename-context default/api-spoke2.example.com/admin spoke2
 ```
 
 5. Switch to the `hub` context for the next few commands. This will cause the commands you enter to execute in the hub cluster.
+
 ```
 oc config use-context hub
 ```
 
 6. Install the OpenShift GitOps operator on the Hub. This will install an instance of ArgoCD. *Make sure you are using the hub context.*
+
 ```
 oc config use-context hub
 oc apply -f - << EOF
@@ -116,6 +133,9 @@ argocd cluster add -y spoke2
 ```
 
 6. Create an ApplicationSet that will deploy an example application to Spoke 1 and Spoke 2.
+
+Note: the commands below look up the URL for each cluster and save them to shell environment variables, which are then used in the `oc apply` command. By the time OpenShift receives the ApplicationSet definition, the shell has already filled in some of the values.
+
 ```
 oc config use-context hub
 export SPOKE1_CLUSTER_URL=$(argocd cluster list -o json | jq -r '.[] | select(.name=="spoke1").server')
@@ -157,7 +177,24 @@ spec:
 EOF
 ```
 
-7. Verify the status of the ApplicationSet.
+7. View the created ApplicationSet object.
+```
+oc get applicationset example -n openshift-gitops -o yaml
+```
+
+The output will look similar to this:
+
+!(Example Output of the oc get applicationset command)[/assets/oc-get-applicationset-screenshot.png]
+
+Notice that the URLs inside of the "generators:" section are filled in as constant values. Below that, in the "template:" section, they are referenced as variables.
+
+This is because ArgoCD ApplicationSets have two parts - the generator(s) and the template.
+
+A generator is a way of generating key-value pairs that are filled into the template. The output of the generator is a list of maps of parameters. In the example above we use the List generator. This is the simplest generator and it allows specifying values directly in the ApplicationSet definition. We generate two maps of parameters, one for each spoke cluster. The template will be instantiated twice, once with the "cluster" parmaeter set to "spoke1", and again with the "cluster" parameter set to "spoke2".
+
+An ApplicationSet's template is used to create one or more Applications. The template is instantiated once for each map of parameters that is generated by the generator. Each instantiation creates one Application. The template language is simple, supporting only variable replacement. No if statements or functions are supported at the time of writing.
+
+8. Verify the status of the ApplicationSet.
 ```
 oc config use-context hub
 argocd --grpc-web appset list
@@ -165,7 +202,7 @@ argocd --grpc-web appset list
 
 ArgoCD shows a list of all ApplicationSets. The output should include a message indicating that ArgoCD has "Successfully generated parameters for all Applications".
 
-8. Verify the status of the Applications.
+9. Verify the status of the Applications.
 ```
 oc config use-context hub
 argocd app list
@@ -173,8 +210,12 @@ argocd app list
 
 Both applications should show a status of "Healthy". They might show a status of "Progressing" for up to one minute while they deploy.
 
-9. Verify that the Pod is running on Spoke1
+10. Switch to the `oc` context for Spoke1 for the remaining commands.
+```
+oc config use-context spoke1
+```
 
+11. Verify that the application Pod is running on Spoke1.
 ```
 oc config use-context spoke1
 oc get pod -n example-spoke1
@@ -182,14 +223,14 @@ oc get pod -n example-spoke1
 
 The Pod should show a status of `Running`.
 
-10. Optional - verify that the application returns data, using `curl`
+12. Optional - verify that the application returns data, using `curl`
 ```
 oc config use-context spoke1
 export SPOKE1_APP_URL=$(oc get route -n example-spoke1 hello-world -o json | jq -r .spec.host)
 curl -k ${SPOKE1_APP_URL}
 ```
 
-11. Opional - verify that you can browse to the application
+13. Opional - verify that you can browse to the application
 Paste the URL printed by the commands below into your browser (or CTRL-click it).
 ```
 oc config use-context spoke1
