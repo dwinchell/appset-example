@@ -26,12 +26,12 @@ You will also need several CLI commands:
 * `jq` - Not strictly required to perform the task, but these instructions use it to simplify certain tasks.
 
 # Setup
-1. Login to the Hub cluster.
+1. Login to the OpenShift cluster that will be used as the Hub.
 
 The example below assumes you are using a token for authentication, as if you were copy-pasting the login command from the web console. You can also login interactively with a username and password.
 
 ```
-oc login --token=sha256~yourtokenfromhubui --server=https://api.hub.example.com
+oc login --token=sha256~yourtokenfromhub --server=https://api.hub.example.com
 ```
 
 2. Get the automatically generated name of the `oc` context that represents the connection to the Hub cluster.
@@ -40,7 +40,9 @@ oc current-context
 ```
 
 3. Rename the current context using the `oc rename-context` command and copy-pasting the long, automatically generated name. Set the new name to `hub`. This will make the rest of the commands easier.
+
 **Important:** do not copy paste this command as-is. Fill in the generated context name from the output of the `oc current-context` command.
+
 ```
 oc config rename-context default/api.hub.example.com/admin hub
 ```
@@ -48,12 +50,12 @@ oc config rename-context default/api.hub.example.com/admin hub
 4. Repeat steps 1-3 for the spoke clusters. For each cluster: login, get the context name, and rename it. Use `spoke1` and `spoke2` for the names.
 ```
 # Spoke1
-oc login --token=sha256~yourtokenfromspoke1ui --server=https://api.spoke1.example.com
+oc login --token=sha256~yourtokenfromspoke1 --server=https://api.spoke1.example.com
 oc current-context
 oc config rename-context default/api-spoke1.example.com/admin spoke1
 
 # Spoke2
-oc login --token=sha256~yourtokenfromspoke2ui --server=https://api.spoke2.example.com
+oc login --token=sha256~yourtokenfromspoke2 --server=https://api.spoke2.example.com
 oc current-context
 oc config rename-context default/api-spoke2.example.com/admin spoke2
 ```
@@ -83,7 +85,7 @@ EOF
 
 3. *Wait* for the OpenShift GitOps operator to install, and for the ArgoCD server to start.
 
-This should take a few minutes. You can optionally run the command below to monitor progress. Wait for a Pod with a name that starts with `openshift-gitops-server-` to appear and transition to status `Running`, then terminate the output with CTRL-c.
+This should only take a few minutes. You can optionally run the command below to monitor progress. Wait for a Pod with a name that starts with `openshift-gitops-server-` to appear and transition to status `Running`, then terminate the output with CTRL-c.
 ```
 oc config use-context hub
 oc get po -n openshift-gitops -w
