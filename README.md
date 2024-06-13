@@ -16,14 +16,14 @@ The instructions assume three small OpenShift clusters:
   - Spoke1 - Hosts example workloads.
   - Spoke2 - Hosts example workloads.
 
-These can be small clusters. Single node clusters with 16 cpu and 32 GiB are big enough.
+These can be small clusters. These instructions have been tested on single-node clusters with 16 cpu and 32 GiB of memory, but even smaller clusters would work. The same architecture works for Edge usecases using [Red Hat Build of MicroShift](https://access.redhat.com/documentation/en-us/red_hat_device_edge/4/html/overview/device-edge-overview) for the spoke clusters.
 
-If you only have 1 or 2 clusters, you can substitute cluster URLs and it should work fine with no other changes.
+For purposes of experimentation, if you only have 1 or 2 clusters, you can also reuse clusters by substituting repeat URLs into the relevant commands.
 
 You will also need several CLI commands:
 * `oc` - The OpenShift CLI
 * `argocd` - the ArgoCD CLI
-* `jq` - Not strictly required to perform the task, but these instructions use it to simplify certain tasks.
+* `jq` - Not strictly required to perform the task, but these instructions use it to simplify certain steps.
 
 # Setup
 1. Login to the OpenShift cluster that will be used as the Hub.
