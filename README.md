@@ -6,7 +6,7 @@ An example of how to use ArgoCD ApplicationSets to manage workloads across multi
 
 This example assumes a hub and spoke architecture. 
 
-ArgoCD runs only on the hub cluster. It is used to manage workloads on the spoke clusters. ArgoCD ApplicationSets are used to create Applications that define which workloads ArgoCD should deploy to each cluster.
+ArgoCD runs only on the Hub cluster. It is used to manage workloads on the spoke clusters. ArgoCD ApplicationSets are used to create Applications that define which workloads ArgoCD should deploy to each cluster.
 
 The instructions assume you are running on OpenShift, but the architecture is relevant to any Kubernetes environment and most of the commands should work as-is in other Kubernetes environments. The OpenShift GitOps operator is used to install ArgoCD, but you could install upstream ArgoCD using another method without affecting the rest of the instructions.
 
@@ -75,7 +75,7 @@ oc current-context
 oc config rename-context default/api-spoke2.example.com/admin spoke2
 ```
 
-5. Switch to the `hub` context for the next few commands. This will cause the commands you enter to execute in the hub cluster.
+5. Switch to the `hub` context for the next few commands. This will cause the commands you enter to execute on the Hub cluster. The use-context command is repeated below for clarity, but it is only necessary to enter it once each time you switch clusters.
 
 ```
 oc config use-context hub
@@ -100,7 +100,7 @@ spec:
 EOF
 ```
 
-3. *Wait* for the OpenShift GitOps operator to install, and for the ArgoCD server to start.
+3. Wait for the OpenShift GitOps operator to install, and for the ArgoCD server to start.
 
 This should only take a few minutes. You can optionally run the command below to monitor progress. Wait for a Pod with a name that starts with `openshift-gitops-server-` to appear and transition to status `Running`, then terminate the output with CTRL-c.
 ```
@@ -132,7 +132,7 @@ argocd cluster add -y spoke1
 argocd cluster add -y spoke2
 ```
 
-6. Create an ApplicationSet that will deploy an example application to Spoke 1 and Spoke 2.
+6. Create an ApplicationSet that will deploy an example application to Spoke1 and Spoke2.
 
 Note: the commands below look up the URL for each cluster and save them to shell environment variables, which are then used in the `oc apply` command. By the time OpenShift receives the ApplicationSet definition, the shell has already filled in some of the values.
 
@@ -210,7 +210,7 @@ argocd app list
 
 Both applications should show a status of "Healthy". They might show a status of "Progressing" for up to one minute while they deploy.
 
-10. Switch to the `oc` context for Spoke1 for the remaining commands.
+10. Switch to the `spoke1` context for Spoke1 for the remaining commands. This will cause oc commands to execute on the Spoke1 cluster. The use-context command is repeated below for clarity, but it is only necessary to enter it once each time you switch clusters.
 ```
 oc config use-context spoke1
 ```
