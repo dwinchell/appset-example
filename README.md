@@ -1,17 +1,21 @@
-# ArgoCD AppSet Example
-An example of how to use ArgoCD ApplicationSets to manage workloads across multiple clusters.
+# Using OpenShift GitOps
+An example of how to use OpenShift GitOps and ArgoCD ApplicationSets to manage workloads across multiple clusters.
 
+# Introduction
 
-# Architecture
+As the number of OpenShift clusters in an enterprise grows, the effort of managing the configuration of each cluster also grows. This is true even if each cluster is managed individually using a GitOps approach.
 
-This example assumes a hub and spoke architecture. 
+There are a number of possible solutions to this challenge. One option is to adopt a hub and spoke architecture where a single hub cluster manages the configuration of the others, which are referred to as spokes. 
 
-ArgoCD runs only on the Hub cluster. It is used to manage workloads on the spoke clusters. ArgoCD ApplicationSets are used to create Applications that define which workloads ArgoCD should deploy to each cluster.
+Sometimes this pattern is repeated between multi-cluster environments, which allows testing of changes to the hub before promoting them to production. You might have a set of development clusters managed by a development hub, and a set of production clusters managed by a production hub.
 
-The instructions assume you are running on OpenShift, but the architecture is relevant to any Kubernetes environment and most of the commands should work as-is in other Kubernetes environments. The OpenShift GitOps operator is used to install ArgoCD, but you could install upstream ArgoCD using another method without affecting the rest of the instructions.
+Choosing a hub and spoke architecture leaves open the question of how to implement the automation that allows the hub to control the spokes. One option is to deploy a single instance of ArgoCD to the hub and configure it to manage the spokes. This post walks through an example of that configuration.
 
+OpenShift GitOps is Red Hat's solution for deploying supported instances of ArgoCD. It allows administrators to provision and configure ArgoCD using an operator and CRDs that are themselves GitOps-friendly. It also supports a multi-tenant model where multiple, dedicated instances of ArgoCD are automatically provision to support multiple tenant development teams while ensuring that each ArgoCD instance and team has only the needed permissions. This post uses OpenShift GitOps to deploy ArgoCD.
 
-# Prerequisites
+# Walkthrough
+
+## Prerequisites
 
 The instructions assume three small OpenShift clusters:
   - Hub - ArgoCD is deployed here. Does not host any workloads.
@@ -20,15 +24,13 @@ The instructions assume three small OpenShift clusters:
 
 These can be small clusters. These instructions have been tested on single-node clusters with 16 cpu and 32 GiB of memory, but even smaller clusters would work. The same architecture works for Edge usecases using [Red Hat Build of MicroShift](https://access.redhat.com/documentation/en-us/red_hat_device_edge/4/html/overview/device-edge-overview) for the spoke clusters.
 
-For purposes of experimentation, if you only have 1 or 2 clusters, you can also reuse clusters by substituting repeat URLs into the relevant commands.
-
 You will also need several CLI commands:
 * `oc` - The OpenShift CLI
 * `argocd` - the ArgoCD CLI
 * `jq` - Not strictly required to perform the task, but these instructions use it to simplify certain steps.
 
 
-# Setup
+## Instructions
 
 1. Login to the OpenShift cluster that will be used as the Hub.
 
@@ -236,3 +238,17 @@ Paste the URL printed by the commands below into your browser (or CTRL-click it)
 oc config use-context spoke1
 echo https://$(oc get route -n example-spoke1 hello-world -o json | jq -r .spec.host)
 ```
+
+# Conclusion and Next Steps
+
+Using OpenShift GitOps and ApplicationSets in a hub and spoke model reduces the toil and complexity of managing configuration and workloads across multiple clusters.
+
+However, this technique alone does not address other challenges that arise when you have many clusters. Taking this model to the next level requires additional techniques and tooling.
+
+Some immediate challenges that arise as the number of clusters grows include governance, observability, and the provisioning of the clusters themselves. [Red Hat Advanced Cluster Management](https://www.redhat.com/en/technologies/management/advanced-cluster-management) can help address these challenges. It supports and compliments the model presented above, but a deep dive into how is worth a post of its own.
+
+It can also be a challenge to secure a large number of clusters. [Red Hat Advanced Security for Kubernetes](https://www.redhat.com/en/technologies/cloud-computing/openshift/advanced-cluster-security-kubernetes) provides additional tooling that helps address that challenge.
+
+It's also important to note that the coommands above presented a simple use case and already required a user to enter a number of shell commands. Implementing this technique at scale in a way that is maintainable and easily operated also requires a non-trivial amount of GitOps definitions and glue automation that you may not want to implement yourself.
+
+[Red Hat Edge Validated Patterns](https://www.redhat.com/en/products/edge/validated-patterns) address this sort of challenge by providing pre-defined configurations that bring together the Red Hat portfolio and technology ecosystem to help you stand up your architecture faster. Not all patterns are specific to the Edge. In particular you may be interested in the [Multicloud GitOps Pattern](https://validatedpatterns.io/patterns/multicloud-gitops/), which uses a similar architecture to the one presented above. There are some differences, including autonomous ArgoCD instances that are deployed to each spoke cluster but managed centrally. The pattern also introductes Red Hat Advanced Cluster Management and [Red Hat Advanced Cluster Security](https://www.redhat.com/en/technologies/cloud-computing/openshift/advanced-cluster-security-kubernetes). It features a somehat more complex but much more comprehensive design and implementation.
