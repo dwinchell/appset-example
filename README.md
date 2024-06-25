@@ -46,7 +46,7 @@ oc login --token=sha256~yourtokenfromhub --server=https://api.hub.example.com
 Use the current-context command to display the context name.
 
 ```
-oc current-context
+oc config current-context
 ```
 
 Copy the context name for use in the next step.
@@ -57,7 +57,7 @@ Copy the context name for use in the next step.
 
 Copy the long, automatically generated context name from the previous output and paste it into this command. Set the new name to `hub`. This will make the rest of the commands easier.
 
-**Important:** do not copy paste this command as-is. Fill in the generated context name from the output of the `oc current-context` command.
+**Important:** do not copy paste this command as-is. Fill in the generated context name from the output of the `oc config current-context` command.
 
 ```
 oc config rename-context default/api.hub.example.com/admin hub
@@ -68,12 +68,12 @@ oc config rename-context default/api.hub.example.com/admin hub
 ```
 # Spoke1
 oc login --token=sha256~yourtokenfromspoke1 --server=https://api.spoke1.example.com
-oc current-context
+oc config current-context
 oc config rename-context default/api-spoke1.example.com/admin spoke1
 
 # Spoke2
 oc login --token=sha256~yourtokenfromspoke2 --server=https://api.spoke2.example.com
-oc current-context
+oc config current-context
 oc config rename-context default/api-spoke2.example.com/admin spoke2
 ```
 
