@@ -230,7 +230,7 @@ curl -k ${SPOKE1_APP_URL}
 
 Paste the URL printed by the commands below into your browser (or CTRL-click it).
 ```
-echo https://$(oc get route -n example-spoke1 hello-world -o json | jq -r .spec.host)
+echo http://$(oc get route -n example-spoke1 hello-world -o json | jq -r .spec.host)
 ```
 
 # Conclusion and Next Steps
