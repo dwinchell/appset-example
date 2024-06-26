@@ -63,6 +63,8 @@ Copy the long, automatically generated context name from the previous output and
 oc config rename-context default/api.hub.example.com/admin hub
 ```
 
+![Example Command Output. Context successfully renamed.](/assets/oc-config-rename-context-hub_2.png)
+
 4. Repeat steps 1-3 for the spoke clusters. For each cluster: login, get the context name, and rename it. Use `spoke1` and `spoke2` for the names.
 
 ```
