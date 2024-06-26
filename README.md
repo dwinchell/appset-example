@@ -19,18 +19,16 @@ This post demonstrates how to use OpenShift GitOps to deploy ArgoCD and use it t
 
 ## Prerequisites
 
-The instructions assume three small OpenShift clusters:
+We will use three OpenShift clusters:
   - Hub - ArgoCD is deployed here. Does not host any workloads.
   - Spoke1 - Hosts example workloads.
   - Spoke2 - Hosts example workloads.
 
 These can be small clusters. These instructions have been tested on single-node clusters with 16 cpu and 32 GiB of memory, but even smaller clusters would work. The same architecture works for Edge usecases using [Red Hat Build of MicroShift](https://access.redhat.com/documentation/en-us/red_hat_device_edge/4/html/overview/device-edge-overview) for the spoke clusters.
 
-You will also need several CLI commands:
+We will also use two CLI commands:
 * `oc` - The OpenShift CLI
 * `argocd` - the ArgoCD CLI
-* `jq` - Not strictly required to perform the task, but these instructions use it to simplify certain steps.
-
 
 ## Setting Up OpenShift GitOps
 
