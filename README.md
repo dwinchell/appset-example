@@ -108,7 +108,7 @@ This should only take a few minutes. You can optionally run the command below to
 oc get po -n openshift-gitops -w
 ```
 
-4.  *Wait* for a Pod with a name that starts with `openshift-gitops-server-` to appear and transition to status `Running`, and then terminate the command output with CTRL-c.
+4.  **Wait** for a Pod with a name that starts with `openshift-gitops-server-` to appear and transition to status `Running`, and then terminate the command output with CTRL-c.
 
 5. Get the inital ArgoCD admin password, login, and reset the password.
 ```
