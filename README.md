@@ -53,11 +53,11 @@ oc config current-context
 
 Copy the context name for use in the next step.
 
-3. Rename the current context using the `oc rename-context` command. 
+3. Rename the current context using the `oc rename-context` command.
 
-Copy the long, automatically generated context name from the previous output and paste it into this command. Set the new name to `hub`. This will make the rest of the commands easier.
+We will refer to this context by name several times in the commands below, so giving it a short descriptive name will help.
 
-**Important:** do not copy paste this command as-is. Fill in the generated context name from the output of the `oc config current-context` command.
+Copy the long, automatically generated context name from the previous output and paste it into this the command below. Set the new name to `hub`.
 
 ```
 oc config rename-context default/api.hub.example.com/admin hub
