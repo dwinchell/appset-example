@@ -131,6 +131,8 @@ argocd cluster add -y spoke1
 argocd cluster add -y spoke2
 ```
 
+If argocd commands display a warning that it failed to invoke a grpc calls, you can safely ignore this warning or add the --grpc-web flag to the commands.
+
 7. Create an ApplicationSet that will deploy an example application to Spoke1 and Spoke2.
 
 Note: the commands below look up the URL for each cluster and save them to shell environment variables, which are then used in the `oc apply` command. By the time OpenShift receives the ApplicationSet definition, the shell has already filled in some of the values.
