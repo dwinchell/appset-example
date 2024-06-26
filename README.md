@@ -182,13 +182,13 @@ EOF
 oc get applicationset example -n openshift-gitops -o yaml
 ```
 
-The output will include a section similar to this:
+The output will include a lines similar to this:
 
-!(Example Output of the oc get applicationset command)[/assets/oc-get-applicationset-screenshot.png]
+!(Example Output of the oc get applicationset command)[/assets/assets/oc-get-appliationset-2.png]
 
 Notice that the URLs inside of the "generators:" section are filled in as constant values. Below that, in the "template:" section, they are referenced as variables.
 
-This is because ArgoCD ApplicationSets have two parts - the generator(s) and the template.
+We did it this way is because ArgoCD ApplicationSets have two parts - the generator(s) and the template.
 
 A generator is a way of generating key-value pairs that are filled into the template. The output of the generator is a list of maps of parameters. In the example above we use the List generator. This is the simplest generator and it allows specifying values directly in the ApplicationSet definition. We generate two maps of parameters, one for each spoke cluster. The template will be instantiated twice, once with the "cluster" parmaeter set to "spoke1", and again with the "cluster" parameter set to "spoke2".
 
