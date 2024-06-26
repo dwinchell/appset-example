@@ -49,9 +49,9 @@ Use the current-context command to display the context name.
 oc config current-context
 ```
 
-Copy the context name for use in the next step.
+![Example Command Output. Copy paste the name of the context.](/assets/oc-config-current-context_1.png)
 
-![Example Command Output. Copy paste the name of the context.](/assets/oc-current-context-screenshot.png)
+Copy the context name for use in the next step.
 
 3. Rename the current context using the `oc rename-context` command. 
 
