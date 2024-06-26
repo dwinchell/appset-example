@@ -304,13 +304,11 @@ argocd app get example-in-cluster
 ```
 
 This command will display output similar to:
-```
-GROUP               KIND        NAMESPACE           NAME                   STATUS     HEALTH   HOOK  MESSAGE
-                    ConfigMap   example-in-cluster  hello-world-configmap  Synced                    configmap/hello-world-configmap unchanged
-                    Service     example-in-cluster  hello-world            OutOfSync  Missing        services is forbidden: User "system:serviceaccount:openshift-gitops:openshift-gitops-argocd-application-controller" cannot create resource "services" in API group "" in the namespace "example-in-cluster"
-apps                Deployment  example-in-cluster  hello-world            OutOfSync  Missing        deployments.apps is forbidden: User "system:serviceaccount:openshift-gitops:openshift-gitops-argocd-application-controller" cannot create resource "deployments" in API group "apps" in the namespace "example-in-cluster"
-route.openshift.io  Route       example-in-cluster  hello-world            OutOfSync  Missing        routes.route.openshift.io is forbidden: User "system:serviceaccount:openshift-gitops:openshift-gitops-argocd-application-controller" cannot create resource "routes" in API group "route.openshift.io" in the namespace "example-in-cluster"
-```
+    GROUP               KIND        NAMESPACE           NAME                   STATUS     HEALTH   HOOK  MESSAGE
+                        ConfigMap   example-in-cluster  hello-world-configmap  Synced                    configmap/hello-world-configmap unchanged
+                        Service     example-in-cluster  hello-world            OutOfSync  Missing        services is forbidden: User "system:serviceaccount:openshift-gitops:openshift-gitops-argocd-application-controller" cannot create resource "services" in API group "" in the namespace "example-in-cluster"
+    apps                Deployment  example-in-cluster  hello-world            OutOfSync  Missing        deployments.apps is forbidden: User "system:serviceaccount:openshift-gitops:openshift-gitops-argocd-application-controller" cannot create resource "deployments" in API group "apps" in the namespace "example-in-cluster"
+    route.openshift.io  Route       example-in-cluster  hello-world            OutOfSync  Missing        routes.route.openshift.io is forbidden: User "system:serviceaccount:openshift-gitops:openshift-gitops-argocd-application-controller" cannot create resource "routes" in API group "route.openshift.io" in the namespace "example-in-cluster"
 
 # Conclusion and Next Steps
 
