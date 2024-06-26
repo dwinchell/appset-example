@@ -182,7 +182,7 @@ EOF
 oc get applicationset example -n openshift-gitops -o yaml
 ```
 
-The output will look similar to this:
+The output will include a section similar to this:
 
 !(Example Output of the oc get applicationset command)[/assets/oc-get-applicationset-screenshot.png]
 
