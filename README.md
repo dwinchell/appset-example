@@ -30,7 +30,7 @@ You will also need several CLI commands:
 * `jq` - Not strictly required to perform the task, but these instructions use it to simplify certain steps.
 
 
-## Instructions
+## Setting Up OpenShift GitOps
 
 1. Login to the OpenShift cluster that will be used as the Hub.
 
@@ -101,16 +101,20 @@ spec:
 EOF
 ```
 
-3. Monitor the progress of the OpenShift GitOps installation.
+7. Monitor the progress of the OpenShift GitOps installation.
 
 This should only take a few minutes. You can optionally run the command below to monitor progress. 
 ```
 oc get po -n openshift-gitops -w
 ```
 
-4.  **Wait** for a Pod with a name that starts with `openshift-gitops-server-` to appear and transition to status `Running`, and then terminate the command output with CTRL-c.
+8.  **Wait** for OpenShift GitOps to be installed, and for the operator to start an instance of ArgoCD.
 
-5. Get the inital ArgoCD admin password, login, and reset the password.
+When the output shows a Pod with a name that starts with `openshift-gitops-server-` to appear and transition to status `Running`, ArgoCD is ready.
+
+When this has happened, terminate the command output with CTRL-c.
+
+9. Get the inital ArgoCD admin password, login, and reset the password.
 ```
 export INITIAL_ARGOCD_PASSWORD=$(oc get secret -n openshift-gitops openshift-gitops-cluster -o json | jq '.data["admin.password"]' | sed 's/"//g' | base64 -d)
 export NEW_ARGOCD_PASSWORD=$(tr -dc 'A-Za-z0-9!?%=' < /dev/urandom | head -c 30) # Generates a strong random password
@@ -132,6 +136,10 @@ argocd cluster add -y spoke2
 ```
 
 If argocd commands display a warning that it failed to invoke a grpc calls, you can safely ignore this warning or add the --grpc-web flag to the commands.
+
+We now have OpenShift GitOps installed on the Hub, and ArgoCD configured to connect to the Spokes.
+
+## Creating a Basic ApplicationSet
 
 7. Create an ApplicationSet that will deploy an example application to Spoke1 and Spoke2.
 
@@ -232,6 +240,51 @@ Paste the URL printed by the commands below into your browser (or CTRL-click it)
 ```
 echo http://$(oc get route -n example-spoke1 hello-world -o json | jq -r .spec.host)
 ```
+
+## Using the Cluster Generator
+
+As we saw in the previous section, we can specify key-value pairs using the simple List generator and then use them in a template. However, if values we want are the names and URLs of clusters, we can use better generator for this purpose - the Cluster generator.
+
+15. Switch back to the hub context.
+
+```
+oc config use-context hub
+```
+
+16. Update the ApplicationSet to use the Cluster generator to fill in the cluster names and URLs.
+
+```
+oc apply -f - <<EOF
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: example
+  namespace: openshift-gitops
+spec:
+  generators:
+  - clusters: {}
+  goTemplate: true
+  goTemplateOptions:
+  - missingkey=error
+  template:
+    metadata:
+      name: example-{{ .name }}
+    spec:
+      destination:
+        namespace: example-{{ .name }}
+        server: '{{ .server }}'
+      project: default
+      source:
+        repoURL: https://github.com/validatedpatterns/multicloud-gitops.git
+        path: "charts/all/hello-world/"
+        targetRevision: HEAD
+      syncPolicy:
+        automated: {}
+        syncOptions:
+        - CreateNamespace=true
+EOF
+```
+
 
 # Conclusion and Next Steps
 
