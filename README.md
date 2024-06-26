@@ -227,6 +227,7 @@ curl -k ${SPOKE1_APP_URL}
 ```
 
 14. Opional - verify that you can browse to the application
+
 Paste the URL printed by the commands below into your browser (or CTRL-click it).
 ```
 echo https://$(oc get route -n example-spoke1 hello-world -o json | jq -r .spec.host)
