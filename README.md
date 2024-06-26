@@ -51,7 +51,7 @@ oc config current-context
 
 Copy the context name for use in the next step.
 
-!(Example Command Output. Copy paste the name of the context.)[/assets/oc-current-context-screenshot.png]
+![Example Command Output. Copy paste the name of the context.](/assets/oc-current-context-screenshot.png)
 
 3. Rename the current context using the `oc rename-context` command. 
 
@@ -192,7 +192,7 @@ oc get applicationset example -n openshift-gitops -o yaml
 
 The output will include a lines similar to this:
 
-!(Example Output of the oc get applicationset command)[/assets/oc-get-applicationset-2.png]
+![Example Output of the oc get applicationset command](/assets/oc-get-applicationset-2.png)
 
 Notice that the URLs inside of the "generators:" section are filled in as constant values. Below that, in the "template:" section, they are referenced as variables.
 
@@ -285,6 +285,32 @@ spec:
 EOF
 ```
 
+17. Check the status of our apps after the change.
+
+```
+argocd app list
+```
+
+Now we have three applications, instead of two. What happened?
+
+By default, the Cluster generator causes the template to be instantiated for every cluster configured in ArgoCD. When we installed OpenShift GitOps in the Hub cluster, ArgoCD was automatically configured with the Hub cluster itself, so we get a third application.
+
+But why is the new application out of sync?
+
+18. Investigate the new "example-in-cluster" application.
+
+```
+argocd app get example-in-cluster
+```
+
+This command will display output similar to:
+```
+GROUP               KIND        NAMESPACE           NAME                   STATUS     HEALTH   HOOK  MESSAGE
+                    ConfigMap   example-in-cluster  hello-world-configmap  Synced                    configmap/hello-world-configmap unchanged
+                    Service     example-in-cluster  hello-world            OutOfSync  Missing        services is forbidden: User "system:serviceaccount:openshift-gitops:openshift-gitops-argocd-application-controller" cannot create resource "services" in API group "" in the namespace "example-in-cluster"
+apps                Deployment  example-in-cluster  hello-world            OutOfSync  Missing        deployments.apps is forbidden: User "system:serviceaccount:openshift-gitops:openshift-gitops-argocd-application-controller" cannot create resource "deployments" in API group "apps" in the namespace "example-in-cluster"
+route.openshift.io  Route       example-in-cluster  hello-world            OutOfSync  Missing        routes.route.openshift.io is forbidden: User "system:serviceaccount:openshift-gitops:openshift-gitops-argocd-application-controller" cannot create resource "routes" in API group "route.openshift.io" in the namespace "example-in-cluster"
+```
 
 # Conclusion and Next Steps
 
