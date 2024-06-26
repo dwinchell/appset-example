@@ -303,7 +303,7 @@ But why is the new application out of sync?
 argocd app get example-in-cluster
 ```
 
-The output is long, but we have an error message similar to, 'SyncError  Failed sync attempt to d97644d7d1bb261837aea069a7fb73c3b7881b71: one or more objects failed to apply, reason: routes.route.openshift.io is forbidden: User "system:serviceaccount:openshift-gitops:openshift-gitops-argocd-application-controller" cannot create resource "routes" ...'
+The output is long, but we have an error message similar to, `SyncError  Failed sync attempt to d97644d7d1bb261837aea069a7fb73c3b7881b71: one or more objects failed to apply, reason: routes.route.openshift.io is forbidden: User "system:serviceaccount:openshift-gitops:openshift-gitops-argocd-application-controller" cannot create resource "routes" ...`
 
 ArgoCD is attempting to create the resources for our example application, but it fails because the serviceaccount that it is using does not have the required permissions. The default instance of ArgoCD created by the OpenShift GitOps operator does not have permission to do deploy our application.
 
