@@ -11,7 +11,9 @@ Sometimes this pattern is repeated between multi-cluster environments, which all
 
 Choosing a hub and spoke architecture leaves open the question of how to implement the automation that allows the hub to control the spokes. One option is to deploy a single instance of ArgoCD to the hub and configure it to manage the spokes. This post walks through an example of that configuration.
 
-OpenShift GitOps is Red Hat's solution for deploying supported instances of ArgoCD. It allows administrators to provision and configure ArgoCD using an operator and CRDs that are themselves GitOps-friendly. It also supports a multi-tenant model where multiple, dedicated instances of ArgoCD are automatically provision to support multiple tenant development teams while ensuring that each ArgoCD instance and team has only the needed permissions. This post uses OpenShift GitOps to deploy ArgoCD.
+OpenShift GitOps is Red Hat's solution for deploying supported instances of ArgoCD. It allows administrators to provision and configure ArgoCD using an operator and CRDs that are themselves GitOps-friendly. It also supports a multi-tenant model where multiple, dedicated instances of ArgoCD are automatically provision to support multiple tenant development teams while ensuring that each ArgoCD instance and team has only the needed permissions.
+
+This post demonstrates how to use OpenShift GitOps to deploy ArgoCD and use it to manage workloads on multiple clusters in a hub and spoke model.
 
 # Walkthrough
 
