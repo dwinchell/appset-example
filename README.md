@@ -77,7 +77,7 @@ oc config current-context
 oc config rename-context default/api-spoke2.example.com/admin spoke2
 ```
 
-5. Switch to the `hub` context for the next few commands. This will cause the commands you enter to execute on the Hub cluster. The use-context command is repeated below for clarity, but it is only necessary to enter it once each time you switch clusters.
+5. Switch to the `hub` context for the next few commands. This will cause the commands you enter to execute on the Hub cluster.
 
 ```
 oc config use-context hub
@@ -86,7 +86,6 @@ oc config use-context hub
 6. Install the OpenShift GitOps operator on the Hub. This will install an instance of ArgoCD. *Make sure you are using the hub context.*
 
 ```
-oc config use-context hub
 oc apply -f - << EOF
 apiVersion: operators.coreos.com/v1alpha1
 kind: Subscription
@@ -102,18 +101,17 @@ spec:
 EOF
 ```
 
-3. Wait for the OpenShift GitOps operator to install, and for the ArgoCD server to start.
+3. Monitor the progress of the OpenShift GitOps installation.
 
-This should only take a few minutes. You can optionally run the command below to monitor progress. Wait for a Pod with a name that starts with `openshift-gitops-server-` to appear and transition to status `Running`, then terminate the output with CTRL-c.
+This should only take a few minutes. You can optionally run the command below to monitor progress. 
 ```
-oc config use-context hub
 oc get po -n openshift-gitops -w
 ```
 
+4.  *Wait* for a Pod with a name that starts with `openshift-gitops-server-` to appear and transition to status `Running`, then terminate the output with CTRL-c.
+
 4. Get the inital ArgoCD admin password, login, and reset the password.
 ```
-oc config use-context hub
-
 export INITIAL_ARGOCD_PASSWORD=$(oc get secret -n openshift-gitops openshift-gitops-cluster -o json | jq '.data["admin.password"]' | sed 's/"//g' | base64 -d)
 export NEW_ARGOCD_PASSWORD=$(tr -dc 'A-Za-z0-9!?%=' < /dev/urandom | head -c 30) # Generates a strong random password
 export ARGOCD_URL=$(oc get route -n openshift-gitops openshift-gitops-server -o json | jq -r .spec.host)
@@ -129,7 +127,6 @@ oc delete secret -n openshift-gitops openshift-gitops-cluster
 *WARNING: This will create a service account `argocd-manager` on the cluster referenced by context `spoke1` with full cluster level privileges.*
 
 ```
-oc config use-context hub
 argocd cluster add -y spoke1
 argocd cluster add -y spoke2
 ```
@@ -139,7 +136,6 @@ argocd cluster add -y spoke2
 Note: the commands below look up the URL for each cluster and save them to shell environment variables, which are then used in the `oc apply` command. By the time OpenShift receives the ApplicationSet definition, the shell has already filled in some of the values.
 
 ```
-oc config use-context hub
 export SPOKE1_CLUSTER_URL=$(argocd cluster list -o json | jq -r '.[] | select(.name=="spoke1").server')
 export SPOKE2_CLUSTER_URL=$(argocd cluster list -o json | jq -r '.[] | select(.name=="spoke2").server')
 
@@ -198,7 +194,6 @@ An ApplicationSet's template is used to create one or more Applications. The tem
 
 8. Verify the status of the ApplicationSet.
 ```
-oc config use-context hub
 argocd --grpc-web appset list
 ```
 
@@ -206,20 +201,18 @@ ArgoCD shows a list of all ApplicationSets. The output should include a message 
 
 9. Verify the status of the Applications.
 ```
-oc config use-context hub
 argocd app list
 ```
 
 Both applications should show a status of "Healthy". They might show a status of "Progressing" for up to one minute while they deploy.
 
-10. Switch to the `spoke1` context for Spoke1 for the remaining commands. This will cause oc commands to execute on the Spoke1 cluster. The use-context command is repeated below for clarity, but it is only necessary to enter it once each time you switch clusters.
+10. Switch to the `spoke1` context for Spoke1 for the remaining commands. This will cause oc commands to execute on the Spoke1 cluster.
 ```
 oc config use-context spoke1
 ```
 
 11. Verify that the application Pod is running on Spoke1.
 ```
-oc config use-context spoke1
 oc get pod -n example-spoke1
 ```
 
@@ -227,7 +220,6 @@ The Pod should show a status of `Running`.
 
 12. Optional - verify that the application returns data, using `curl`
 ```
-oc config use-context spoke1
 export SPOKE1_APP_URL=$(oc get route -n example-spoke1 hello-world -o json | jq -r .spec.host)
 curl -k ${SPOKE1_APP_URL}
 ```
@@ -235,7 +227,6 @@ curl -k ${SPOKE1_APP_URL}
 13. Opional - verify that you can browse to the application
 Paste the URL printed by the commands below into your browser (or CTRL-click it).
 ```
-oc config use-context spoke1
 echo https://$(oc get route -n example-spoke1 hello-world -o json | jq -r .spec.host)
 ```
 
