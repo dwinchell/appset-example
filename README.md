@@ -184,7 +184,7 @@ oc get applicationset example -n openshift-gitops -o yaml
 
 The output will include a lines similar to this:
 
-(Example Output of the oc get applicationset command)[assets/oc-get-applicationset-2.png]
+!(Example Output of the oc get applicationset command)[/assets/oc-get-applicationset-2.png]
 
 Notice that the URLs inside of the "generators:" section are filled in as constant values. Below that, in the "template:" section, they are referenced as variables.
 
