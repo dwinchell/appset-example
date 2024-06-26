@@ -293,7 +293,7 @@ argocd app list
 
 Now we have three applications, instead of two. What happened?
 
-By default, the Cluster generator causes the template to be instantiated for every cluster configured in ArgoCD. When we installed OpenShift GitOps in the Hub cluster, ArgoCD was automatically configured with the Hub cluster itself, so we get a third application.
+By default, the Cluster generator causes the template to be instantiated for every cluster configured in ArgoCD. That includes the cluster it is deployed to, so we get a third application. ArgoCD refers to that cluster as "in-cluster", so based on our template the name of the appliction is "example-in-cluster".
 
 But why is the new application out of sync?
 
@@ -303,18 +303,88 @@ But why is the new application out of sync?
 argocd app get example-in-cluster
 ```
 
-This command will display output similar to:
-    GROUP               KIND        NAMESPACE           NAME                   STATUS     HEALTH   HOOK  MESSAGE
-                        ConfigMap   example-in-cluster  hello-world-configmap  Synced                    configmap/hello-world-configmap unchanged
-                        Service     example-in-cluster  hello-world            OutOfSync  Missing        services is forbidden: User "system:serviceaccount:openshift-gitops:openshift-gitops-argocd-application-controller" cannot create resource "services" in API group "" in the namespace "example-in-cluster"
-    apps                Deployment  example-in-cluster  hello-world            OutOfSync  Missing        deployments.apps is forbidden: User "system:serviceaccount:openshift-gitops:openshift-gitops-argocd-application-controller" cannot create resource "deployments" in API group "apps" in the namespace "example-in-cluster"
-    route.openshift.io  Route       example-in-cluster  hello-world            OutOfSync  Missing        routes.route.openshift.io is forbidden: User "system:serviceaccount:openshift-gitops:openshift-gitops-argocd-application-controller" cannot create resource "routes" in API group "route.openshift.io" in the namespace "example-in-cluster"
+The output is long, but we have an error message similar to, 'SyncError  Failed sync attempt to d97644d7d1bb261837aea069a7fb73c3b7881b71: one or more objects failed to apply, reason: routes.route.openshift.io is forbidden: User "system:serviceaccount:openshift-gitops:openshift-gitops-argocd-application-controller" cannot create resource "routes" ...'
+
+ArgoCD is attempting to create the resources for our example application, but it fails because the serviceaccount that it is using does not have the required permissions. The default instance of ArgoCD created by the OpenShift GitOps operator does not have permission to do deploy our application.
+
+We could give ArgoCD permission to deploy the application to the Hub, but let's assume for now that we only want to deploy the application to the Spokes.
+
+19. View the list of ArgoCD cluster secrets
+
+When we ran the `argocd cluster add` commands, that created two kubernetes Secret objects in the Hub cluster. These are called "cluster secrets".
+
+```
+oc get secret -l argocd.argoproj.io/secret-type=cluster -n openshift-gitops
+```
+
+We can see that the Secrets are marked with the label, `argocd.argoproj.io/secret-type=cluster`. ArgoCD uses this label to distinguish cluster Secrets.
+
+There is no cluster secret for the in-cluster cluster.
+
+20. Label the cluster secrets for the two spokes.
+
+```
+oc label secret -l argocd.argoproj.io/secret-type=cluster -n openshift-gitops example.company.com/cluster-role=spoke
+```
+
+21. View the updated labels.
+
+```
+oc get secret -l argocd.argoproj.io/secret-type=cluster -n openshift-gitops
+```
+
+19. Configure the cluster generator to target only the spoke clusters.
+
+Let's tell the Cluster generator that we only want to instantiate the template for cluster secrets that have the label "example.company.com/cluster-role" with a value of "spoke".
+
+```
+oc apply -f - <<EOF
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: example
+  namespace: openshift-gitops
+spec:
+  generators:
+  - clusters:
+      selector:
+        matchLabels:
+          example.company.com/cluster-role: spoke
+  goTemplate: true
+  goTemplateOptions:
+  - missingkey=error
+  template:
+    metadata:
+      name: example-{{ .name }}
+    spec:
+      destination:
+        namespace: example-{{ .name }}
+        server: '{{ .server }}'
+      project: default
+      source:
+        repoURL: https://github.com/validatedpatterns/multicloud-gitops.git
+        path: "charts/all/hello-world/"
+        targetRevision: HEAD
+      syncPolicy:
+        automated: {}
+        syncOptions:
+        - CreateNamespace=true
+EOF
+```
+
+23. Verify that there are only two applications now.
+
+```
+argocd app list
+```
+
+As expected, the Cluster generator no longer selects the "in-cluster" cluster, and we are back down to two applications.
 
 # Conclusion and Next Steps
 
-Using OpenShift GitOps and ApplicationSets in a hub and spoke model reduces the toil and complexity of managing configuration and workloads across multiple clusters.
+Using OpenShift GitOps in a hub and spoke model reduces the toil and complexity of managing configuration and workloads across multiple clusters. We can use ArgoCD ApplicationSets, templates and generators to simplify the generation of Application objects for many clusters.
 
-However, this technique alone does not address other challenges that arise when you have many clusters. Taking this model to the next level requires additional techniques and tooling.
+However, these techniques alone do not address other challenges that arise when you have many clusters. Taking this model to the next level requires additional techniques and tooling.
 
 Some immediate challenges that arise as the number of clusters grows include governance, observability, and the provisioning of the clusters themselves. [Red Hat Advanced Cluster Management for Kubernetes](https://www.redhat.com/en/technologies/management/advanced-cluster-management) can help address these challenges. It supports and compliments the model presented above, but a deep dive into how is worth a post of its own.
 
